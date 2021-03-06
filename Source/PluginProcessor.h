@@ -59,6 +59,10 @@ private:
 
     juce::AudioProcessorValueTreeState treeState;
     juce::dsp::LinkwitzRileyFilter<float> lwrFilter;
+
+    int mLowDistChoice = 0;
+    int mHighDistChoice = 0;
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DualBandDistortionAudioProcessor)
 };

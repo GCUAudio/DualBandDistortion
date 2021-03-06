@@ -20,10 +20,14 @@ DualBandDistortionAudioProcessor::DualBandDistortionAudioProcessor()
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
                        ), treeState(*this, nullptr, juce::Identifier("PARAMETERS"),
-                           { std::make_unique<juce::AudioParameterFloat>("cutoff", "Cutoff", 20.0f, 20000.0f, 200.0f) })
+                           { std::make_unique<juce::AudioParameterFloat>("cutoff", "Cutoff", 20.0f, 20000.0f, 200.0f),
+                           std::make_unique<juce::AudioParameterChoice>("lowMode", "Low Mode", juce::StringArray("off", "half", "full"), 0),
+                           std::make_unique<juce::AudioParameterChoice>("highMode", "High Mode", juce::StringArray("off", "half", "full"), 0) })
 #endif
 {
     treeState.addParameterListener("cutoff", this);
+    treeState.addParameterListener("lowMode", this);
+    treeState.addParameterListener("highMode", this);
 }
 
 DualBandDistortionAudioProcessor::~DualBandDistortionAudioProcessor()
@@ -151,11 +155,34 @@ void DualBandDistortionAudioProcessor::processBlock (juce::AudioBuffer<float>& b
         for (int i = 0; i < buffer.getNumSamples(); i++)
         {
             float in = channelData[i];
-            float outLow = 0.0f;
-            float outHigh = 0.0f;
+            float low = 0.0f;
+            float high = 0.0f;
 
-            lwrFilter.processSample(channel, in, outLow, outHigh);
-            channelData[i] = outLow + outHigh;
+            lwrFilter.processSample(channel, in, low, high);
+
+            if (mLowDistChoice == 1)
+            {
+                if (low < 0)
+                    low = 0.0f;
+            }
+            else if (mLowDistChoice == 2)
+            {
+                if (low < 0)
+                    low = fabs(low);
+            }
+
+            if (mHighDistChoice == 1)
+            {
+                if (high < 0)
+                    high = 0.0f;
+            }
+            else if (mHighDistChoice == 2)
+            {
+                if (high < 0)
+                    high = fabs(high);
+            }
+
+            channelData[i] = low + high;
         }
     }
 }
@@ -197,5 +224,12 @@ void DualBandDistortionAudioProcessor::parameterChanged(const juce::String& para
 {
     if (parameterID == "cutoff")
         lwrFilter.setCutoffFrequency(newValue);
+
+    else if (parameterID == "lowMode")
+        mLowDistChoice = newValue;
+
+    else if (parameterID == "highMode")
+        mHighDistChoice = newValue;
+    
 
 }

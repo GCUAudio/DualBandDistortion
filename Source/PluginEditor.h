@@ -30,8 +30,13 @@ private:
     DualBandDistortionAudioProcessor& audioProcessor;
     juce::AudioProcessorValueTreeState& treeState;
 
-    juce::Slider cutoffDial;
+    juce::Slider cutoffSlider;
+    juce::ComboBox lowDistCombo;
+    juce::ComboBox highDistCombo;
+
     std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> cutoffValue;
+    std::unique_ptr <juce::AudioProcessorValueTreeState::ComboBoxAttachment> lowDistChoice;
+    std::unique_ptr <juce::AudioProcessorValueTreeState::ComboBoxAttachment> highDistChoice;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DualBandDistortionAudioProcessorEditor)
 };
